@@ -1,61 +1,78 @@
+# Explainable Credit Risk Modeling with Alternative Data and Local LLMs
+
 [![CI](https://img.shields.io/badge/CI-GitHub_Actions-2088FF?logo=githubactions&logoColor=white)](.github/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.13-3776AB?logo=python&logoColor=white)](https://www.python.org/downloads/)
 [![uv](https://img.shields.io/badge/env-uv-4B8BBE)](https://docs.astral.sh/uv/)
-[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-# Explainable Credit Risk Modeling with Alternative Data and Local LLMs
+An artifact-driven credit risk pipeline for the Kaggle Home Credit Default Risk dataset, built as a production-style repository rather than a notebook-only experiment.
 
-A production-style, end-to-end credit risk project built on the Kaggle Home Credit Default Risk dataset.  
-The repository combines feature engineering, baseline and tuned modeling, explainability artifacts, local LLM-assisted narrative reporting, and a demo-ready FastAPI service.
+The project covers the full lifecycle:
+
+- data acquisition and quality validation
+- feature engineering over relational tables
+- baseline and tuned model workflows
+- explainability artifacts (SHAP and LIME)
+- local LLM narrative reporting with fallback behavior
+- FastAPI service endpoints for demo scoring and retrieval
+- final artifact contract verification for demo readiness
+
+## Overview
+
+This repository exists to answer a practical question:
+
+How do you build a local, reproducible, explainable credit-risk system that can be validated, demoed, and operated with clear artifact contracts?
+
+The emphasis is reliability and transparency:
+
+- deterministic file outputs between phases
+- explicit model and artifact selection metadata
+- robust fallback behavior when local LLM generation is unavailable
+- CI checks and test coverage that do not depend on Kaggle/Ollama runtime availability
 
 ## Why This Project
 
-This project is designed to look and behave like an industry ML repository:
+Credit risk projects often stop at model training notebooks. This one continues through explainability, report generation, and an API layer, because that is where many deployment failures happen.
 
-- Reproducible, config-driven workflows
-- Clear artifact contracts across phases
-- Explainability-first model interpretation
-- Local-only LLM reporting (Ollama) with deterministic fallback
-- API service layer for live scoring and demo workflows
+The repository is designed to be credible for engineering review:
 
-## Architecture Overview
+- modular source layout under src
+- CLI-first orchestration
+- typed code and strict quality checks
+- explicit readiness checks and failure messages
 
-Pipeline flow:
+## System Architecture
 
-1. Data acquisition and raw validation
-2. Leakage-safe feature engineering
-3. Baseline training
-4. Hyperparameter tuning + calibration + evaluation
-5. Explainability artifact generation (SHAP/LIME)
-6. Local narrative report generation (Ollama + fallback)
-7. FastAPI scoring and retrieval/generation endpoints
-8. Final artifact verification gate for demo/API readiness
+Pipeline layers:
 
-See [docs/architecture.md](docs/architecture.md) for a concise component map.
+1. Data Layer
+- Download Home Credit data from Kaggle
+- Validate required files and key schema assumptions
+- Convert CSV to interim parquet for stable downstream I/O
 
-## Key Capabilities
+2. Feature Layer
+- Build train/test matrices with one row per SK_ID_CURR
+- Emit feature manifest and join metadata
 
-- Baseline and tuned LightGBM/CatBoost workflows
-- Final production candidate selection with explicit summary artifact
-- SHAP global + local explanations and LIME local explanations
-- Local LLM risk narratives (plain, underwriter, adverse-action-style draft)
-- Artifact-first API with health/readiness/score/explain/report endpoints
-- Final `verify-artifacts` command to prevent demo-time missing outputs
+3. Modeling Layer
+- Baseline LightGBM/CatBoost evaluation
+- Hyperparameter tuning and calibration comparisons
+- Final production-candidate summary and model materialization
 
-## Tech Stack
+4. Explainability Layer
+- Representative cohort selection
+- SHAP global/local and LIME local artifact generation
 
-- Python 3.13
-- `uv` for environment and dependency management
-- `pandas`, `polars`, `scikit-learn`, `lightgbm`, `catboost`, `optuna`
-- `shap`, `lime` for explainability
-- FastAPI + Uvicorn for serving
-- Ollama for local LLM inference (`qwen2.5:7b`, `qwen2.5-coder:7b`)
+5. Local LLM Reporting Layer
+- Narrative generation (plain, underwriter, adverse-action-style draft)
+- Deterministic fallback path when Ollama/model/generation fails
 
-## Dataset and Problem Framing
+6. Service Layer
+- FastAPI endpoints for health/readiness/score/explain/report retrieval/generation
 
-- Dataset: Kaggle Home Credit Default Risk (`home-credit-default-risk`)
-- Task: Predict default risk and produce transparent, reviewable risk evidence
-- Objective: Build a realistic, local-first ML workflow suitable for portfolio/recruiter review and technical demos
+7. Audit Layer
+- Artifact contract verification gate before demos
+
+See [docs/architecture.md](docs/architecture.md) for a compact architecture reference.
 
 ## Repository Structure
 
@@ -85,29 +102,127 @@ See [docs/architecture.md](docs/architecture.md) for a concise component map.
 `-- .env.example
 ```
 
+## Tech Stack
+
+- Python 3.13
+- uv (dependency and environment management)
+- pandas, polars, pyarrow
+- scikit-learn, lightgbm, catboost, imbalanced-learn, optuna
+- shap, lime, matplotlib, plotly
+- FastAPI, Uvicorn
+- Ollama (local runtime)
+
+## Dataset and Problem Framing
+
+- Dataset: Kaggle Home Credit Default Risk (home-credit-default-risk)
+- Goal: predict default risk and surface interpretable, reviewable evidence
+- Scope: local development and demo workflows, not a regulated production deployment
+
+## Implementation Walkthrough (Phase by Phase)
+
+Phase 1: Foundations
+- Project config, CLI entrypoint, environment conventions
+
+Phase 2: Data ingestion and validation
+- Kaggle download flow
+- raw-data validation reports and explicit failure messaging
+
+Phase 3: Feature engineering
+- modular feature builders per source table
+- leakage-safe joins and metadata manifest
+
+Phase 4: Baseline modeling
+- stratified CV baselines for LightGBM and CatBoost
+- baseline metrics and summary artifacts
+
+Phase 5: Tuning, calibration, and final selection
+- Optuna tuning
+- calibration comparisons
+- final production candidate summary + final model output
+
+Phase 6: Explainability
+- representative sample selection by cohort
+- SHAP/LIME local explanation payloads
+
+Phase 7: Local LLM reporting
+- report generation from explainability payloads
+- deterministic fallback with explicit failure reason capture
+
+Phase 8: FastAPI service layer
+- health/readiness
+- scoring endpoint
+- explanation and narrative retrieval/generation endpoints
+
+Phase 9: Hardening and release readiness
+- CI workflow
+- artifact verification gate
+- documentation and demo runbook polish
+
+## Key Features and Why They Exist
+
+- CLI orchestration
+  Keeps runs reproducible and scriptable without notebook state drift.
+
+- Artifact contracts
+  Every phase writes explicit machine-readable outputs for the next phase.
+
+- Local explainability and local LLM reporting
+  Keeps evidence generation on local infrastructure with clear fallback behavior.
+
+- API readiness endpoint
+  Surfaces dependency/artifact health before live demos.
+
+- verify-artifacts gate
+  Prevents "tests passed but demo artifacts are missing" situations.
+
+## Challenges Encountered and What Was Solved
+
+- Artifact contract drift between phases
+  Solved by adding a dedicated artifact verification command with required checks.
+
+- API cache safety under repeated calls
+  Solved by hardening model-store synchronization to avoid nested-cache lock issues.
+
+- Explainability robustness on unstable feature matrices
+  Solved by filtering unstable/non-numeric signals and recording per-case failures.
+
+- Local LLM availability variability
+  Solved with deterministic fallback generation and explicit fallback flags/reasons.
+
+## Production-Style Characteristics (vs Notebook-Only)
+
+- typed source modules with tests
+- CI checks for lint, typing, tests, import smoke
+- PowerShell automation scripts for setup and checks
+- API endpoints with structured error handling
+- artifact verification as a release/demo gate
+
+## Tradeoffs
+
+- CI intentionally skips heavyweight data/model runs
+  Faster and stable CI, but artifact generation remains a local workflow.
+
+- Final-candidate selection currently scoped to tuned candidates
+  Clear Phase 5 contract, but baseline candidates are not auto-promoted in final selection.
+
+- Explain/report endpoints are artifact-backed
+  Reliable and fast for known IDs, but not a generic online explainability service.
+
 ## Setup (Windows 11 + PowerShell + uv)
 
 Prerequisites:
 
-- Python 3.13 installed
-- `uv` installed and available in `PATH`
+- Python 3.13
+- uv in PATH
 - Ollama installed locally
 
-### Quick setup
+Quick start:
 
 ```powershell
 .\scripts\bootstrap.ps1
 ```
 
-This script:
-
-- syncs dependencies with `uv`
-- creates `.env` from `.env.example` if missing
-- creates expected data/artifact directories
-- installs pre-commit hooks
-- runs an import smoke check
-
-### Manual setup (optional)
+Manual setup:
 
 ```powershell
 uv sync --python 3.13 --frozen
@@ -115,18 +230,16 @@ Copy-Item .env.example .env
 uv run credit-risk prepare-dirs
 ```
 
-## Kaggle Credentials
+## Kaggle Setup
 
-You can provide Kaggle credentials in either way:
-
-1. `.env`
+Option A: .env
 
 ```dotenv
 KAGGLE_USERNAME=your_username
 KAGGLE_KEY=your_api_key
 ```
 
-2. `%USERPROFILE%\.kaggle\kaggle.json`
+Option B: %USERPROFILE%\.kaggle\kaggle.json
 
 ```json
 {
@@ -144,41 +257,7 @@ ollama list
 uv run credit-risk healthcheck
 ```
 
-## Developer Workflow Commands
-
-### Setup
-
-```powershell
-.\scripts\bootstrap.ps1
-```
-
-### Quality checks
-
-```powershell
-.\scripts\run_checks.ps1
-```
-
-### Quality checks + artifact contract gate
-
-```powershell
-.\scripts\run_checks.ps1 -IncludeArtifactAudit
-```
-
-### API startup
-
-```powershell
-uv run credit-risk-api
-```
-
-### Local LLM report generation only
-
-```powershell
-uv run credit-risk generate-risk-reports --report-type all --method-source auto --model qwen2.5:7b --overwrite
-```
-
-## End-to-End Workflow (Phase 2 -> Phase 8)
-
-Run from repository root:
+## End-to-End Commands
 
 ```powershell
 uv run credit-risk download-data
@@ -193,16 +272,25 @@ uv run credit-risk verify-artifacts
 uv run credit-risk-api
 ```
 
-## API Endpoints
+Developer quality workflow:
 
-- `GET /health`
-- `GET /readiness`
-- `POST /score`
-- `POST /explain`
-- `POST /risk-report`
-- `GET /artifacts/summary`
+```powershell
+.\scripts\run_checks.ps1
+.\scripts\run_checks.ps1 -IncludeArtifactAudit
+```
 
-### Example API calls (PowerShell)
+## API Usage Overview
+
+Endpoints:
+
+- GET /health
+- GET /readiness
+- POST /score
+- POST /explain
+- POST /risk-report
+- GET /artifacts/summary
+
+Quick check:
 
 ```powershell
 Invoke-RestMethod http://127.0.0.1:8000/health
@@ -210,7 +298,7 @@ Invoke-RestMethod http://127.0.0.1:8000/readiness
 Invoke-RestMethod http://127.0.0.1:8000/artifacts/summary
 ```
 
-Score request:
+Score example:
 
 ```powershell
 Invoke-RestMethod `
@@ -220,56 +308,75 @@ Invoke-RestMethod `
   -Body '{"applicant_id":700001,"engineered_features":{"feature_a":0.5,"feature_b":0.4,"feature_c":0.3}}'
 ```
 
-## Artifact Directory Overview
+## Artifact Guide
 
-| Artifact | Path |
-|---|---|
-| Processed train matrix | `data/processed/home_credit/train_features.parquet` |
-| Processed test matrix | `data/processed/home_credit/test_features.parquet` |
-| Baseline summary | `artifacts/modeling/reports/best_model_summary.json` |
-| Tuned comparison | `artifacts/modeling/metrics/tuned_model_comparison.csv` |
-| Final candidate summary | `artifacts/modeling/reports/final_production_candidate.json` |
-| Final production model | `artifacts/modeling/models/final_production_model.*` |
-| SHAP local explanations | `artifacts/explainability/shap/local/shap_local_explanations.jsonl` |
-| LIME local explanations | `artifacts/explainability/lime/lime_explanations.jsonl` |
-| LLM reports JSONL | `artifacts/llm_reports/combined/llm_reports.jsonl` |
-| LLM reporting summary | `artifacts/llm_reports/reports/llm_reporting_summary.md` |
+Core contract artifacts checked by verify-artifacts:
 
-The final Phase 9 gate validates these contracts:
+- data/processed/home_credit/train_features.parquet
+- data/processed/home_credit/test_features.parquet
+- artifacts/feature_metadata/feature_manifest.csv
+- artifacts/modeling/reports/best_model_summary.json
+- artifacts/modeling/tuning/tuning_results.csv
+- artifacts/modeling/metrics/tuned_model_comparison.csv
+- artifacts/modeling/reports/final_production_candidate.json
+- artifacts/modeling/models/final_production_model.*
+- artifacts/explainability/selected_examples/selected_examples.csv
+- artifacts/explainability/reports/explainability_summary.md
+- artifacts/explainability/shap/local/shap_local_explanations.jsonl or artifacts/explainability/lime/lime_explanations.jsonl
+- artifacts/llm_reports/combined/llm_reports.jsonl
+- artifacts/llm_reports/reports/llm_reporting_summary.md
 
-```powershell
-uv run credit-risk verify-artifacts
-```
+Demo runbook: [docs/demo_runbook.md](docs/demo_runbook.md)
 
-## Demo Runbook
+## Results and Evaluation (Current Repository Artifacts)
 
-A realistic local demo sequence is documented in [docs/demo_runbook.md](docs/demo_runbook.md).
+The current checked artifacts show:
 
-## CI and Release Readiness
+- Baseline best model summary (artifacts/modeling/reports/best_model_summary.json)
+  - best_model_name: lightgbm
+  - primary_metric (roc_auc): 0.7864
 
-GitHub Actions workflow: [.github/workflows/ci.yml](.github/workflows/ci.yml)
+- Final production candidate summary (artifacts/modeling/reports/final_production_candidate.json)
+  - final_candidate_name: lightgbm_tuned_none
+  - primary_metric (roc_auc): 0.7604
 
-CI runs on `push` and `pull_request` for `main` and `master`, and executes:
+- Evaluation summary (artifacts/modeling/evaluation/evaluation_summary.json)
+  - roc_auc: 0.7604
+  - pr_auc: 0.2494
+  - row_count: 307511
 
-- `ruff`
-- `mypy`
-- `pytest`
-- import smoke check for CLI parser and FastAPI app
+Important interpretation:
 
-CI does not require Kaggle download or live Ollama inference.
+- In the current repository state, the baseline LightGBM ROC AUC is higher than the selected tuned final candidate ROC AUC.
+- This is visible in artifacts/modeling/metrics/tuned_model_comparison.csv.
+- The final candidate selection flow is currently tuned-candidate scoped by design in Phase 5; it does not automatically promote baseline candidates.
 
-## Known Limitations
+This is documented intentionally rather than hidden.
 
-- CI validates code quality and tests but does not build heavy artifacts from scratch.
-- Explainability/report endpoints are artifact-backed and applicant-id scoped.
-- LLM outputs are model-dependent and non-deterministic unless fallback is used.
-- Adverse-action-style narratives are internal draft text, not legal notices.
+## Limitations
+
+- CI checks code quality and tests, not full data/model/LLM pipeline execution.
+- API explain/report endpoints are artifact-backed and applicant-ID oriented.
+- LLM outputs vary by local model/runtime state unless fallback is used.
+- Adverse-action-style text is draft explanatory content only.
 
 ## Disclaimer
 
-This repository is for educational and engineering demonstration purposes.  
-Generated narratives (especially adverse-action-style drafts) are not legal advice and must not be treated as production compliance output without legal, policy, and model governance review.
+This project is for engineering demonstration and learning.  
+Generated narratives, especially adverse-action-style drafts, are not legal advice and are not compliance-approved notices.
+
+## Conclusion
+
+This repository demonstrates a full, local-first ML system with explicit contracts from raw data through API serving.
+
+The focus is not just model training; it is operational credibility:
+
+- reproducible workflows
+- explainability and reporting layers
+- API readiness checks
+- artifact verification before demos
+
+For local demonstrations, run verify-artifacts before starting the API.
 
 ## License
-
-MIT. See [LICENSE](LICENSE).
+This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
