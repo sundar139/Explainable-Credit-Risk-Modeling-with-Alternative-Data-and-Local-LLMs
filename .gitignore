@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Environments
+.venv/
+.python-version
+
+# Tooling caches
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+*.log
+logs/
+
+# Editors and OS files
+.vscode/
+.idea/
+*.swp
+*.code-workspace
+Thumbs.db
+Desktop.ini
+
+# Local config and secrets
+.env
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Data and model artifacts
+data/raw/*
+!data/raw/.gitkeep
+data/interim/*
+!data/interim/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+artifacts/*
+!artifacts/.gitkeep
+
+# Jupyter
+.ipynb_checkpoints/

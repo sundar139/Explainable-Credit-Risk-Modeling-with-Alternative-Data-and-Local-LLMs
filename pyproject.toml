@@ -1,0 +1,76 @@
+[build-system]
+requires = ["hatchling>=1.25.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "credit-risk-altdata"
+version = "0.1.0"
+description = "Production-style explainable credit risk modeling with alternative data and local LLM-assisted reporting"
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+license = { text = "MIT" }
+authors = [{ name = "Project Maintainers" }]
+dependencies = [
+    "pandas",
+    "polars",
+    "pyarrow",
+    "scikit-learn",
+    "lightgbm",
+    "catboost",
+    "imbalanced-learn",
+    "optuna",
+    "shap",
+    "lime",
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic",
+    "pydantic-settings",
+    "joblib",
+    "requests",
+    "kaggle",
+    "matplotlib",
+    "plotly",
+]
+
+[project.scripts]
+credit-risk = "credit_risk_altdata.cli:main"
+credit-risk-api = "credit_risk_altdata.api.app:run"
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "ruff",
+    "mypy",
+    "pre-commit",
+    "httpx",
+    "pandas-stubs",
+    "types-requests",
+]
+
+[tool.uv]
+default-groups = ["dev"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/credit_risk_altdata"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-q --cov=credit_risk_altdata --cov-report=term-missing"
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "SIM", "W"]
+
+[tool.mypy]
+python_version = "3.13"
+mypy_path = "src"
+strict = true
+warn_unused_configs = true
+plugins = ["pydantic.mypy"]
+exclude = ["^notebooks/"]
