@@ -348,10 +348,19 @@ The current checked artifacts show:
 Important interpretation:
 
 - In the current repository state, the baseline LightGBM ROC AUC is higher than the selected tuned final candidate ROC AUC.
+- Tuned candidate was selected to optimize calibrated PR AUC = 0.2494 on a heavily imbalanced 307,511-row dataset (positive rate ~8%), where calibration stability matters over raw ROC.
 - This is visible in artifacts/modeling/metrics/tuned_model_comparison.csv.
 - The final candidate selection flow is currently tuned-candidate scoped by design in Phase 5; it does not automatically promote baseline candidates.
 
 This is documented intentionally rather than hidden.
+
+Top 5 SHAP features by global importance (artifacts/explainability/shap/global/shap_feature_importance.csv):
+
+- app_ext_source_mean (mean_abs_shap: 0.4601)
+- app_credit_annuity_ratio (mean_abs_shap: 0.1538)
+- AMT_ANNUITY (mean_abs_shap: 0.1135)
+- app_goods_credit_ratio (mean_abs_shap: 0.1085)
+- EXT_SOURCE_1 (mean_abs_shap: 0.1052)
 
 ## Limitations
 
